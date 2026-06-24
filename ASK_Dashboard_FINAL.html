@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A SECRET KNOWLEDGE — Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bg:#F5F3EE;--surf:#FFF;--surf2:#EFEDE7;--bdr:#E2DFD7;
+  --txt:#1C1C1A;--mute:#706E68;--ink:#1C1C1A;
+  --gold:#B8935A;--gold-lt:#F5EDD8;
+  --pos:#1E6B3C;--pos-bg:#D6F0E0;
+  --neg:#A8200D;--neg-bg:#FAE5E2;
+  --blue:#1A4A8A;--blue-bg:#E8F0FA;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);font-size:13px}
+.shell{display:flex;min-height:100vh}
+.sb{width:214px;background:var(--ink);flex-shrink:0;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow-y:auto}
+.logo{padding:22px 18px 18px;border-bottom:1px solid rgba(255,255,255,.1)}
+.logo-a{font-size:11px;font-weight:700;color:#fff;letter-spacing:.18em;text-transform:uppercase}
+.logo-b{font-size:9px;color:rgba(255,255,255,.38);letter-spacing:.1em;margin-top:3px;text-transform:uppercase}
+.nav{padding:12px 0;flex:1}
+.ng{padding:8px 18px 4px;font-size:9px;font-weight:700;color:rgba(255,255,255,.28);letter-spacing:.12em;text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 18px;color:rgba(255,255,255,.55);font-size:12px;font-weight:500;cursor:pointer;border-left:2px solid transparent;transition:.12s;user-select:none}
+.ni:hover{color:#fff;background:rgba(255,255,255,.06)}
+.ni.on{color:#fff;background:rgba(255,255,255,.09);border-left-color:var(--gold)}
+.ni svg{width:15px;height:15px;flex-shrink:0;opacity:.7}
+.ni.on svg{opacity:1}
+.sbf{padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);font-size:10px;color:rgba(255,255,255,.25);line-height:1.6}
+.sbf a{color:rgba(255,255,255,.4);text-decoration:none}
+.sbf a:hover{color:#fff}
+.main{flex:1;min-width:0;padding:28px 32px;overflow-x:hidden}
+.tab{display:none}.tab.on{display:block}
+.ph{margin-bottom:22px}
+.ph h1{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.ph p{font-size:12px;color:var(--mute);margin-top:3px}
+.src-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.sb-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;transition:.12s}
+.s-g{background:#E3F5EA;color:#1E6B3C}.s-g:hover{background:#C8ECDA}
+.s-b{background:var(--blue-bg);color:var(--blue)}.s-b:hover{background:#D5E5F7}
+.s-gold{background:var(--gold-lt);color:#7A5A2A}.s-gold:hover{background:#EDE0C4}
+.sb-btn svg{width:12px;height:12px;flex-shrink:0}
+.cbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;padding:14px 16px;margin-bottom:18px}
+.cg{display:flex;flex-direction:column;gap:3px}
+.cl{font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
+.pdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.p1c{background:var(--blue)}.p2c{background:var(--gold)}.p3c{background:#AAA89E}
+input[type=date],select{font-size:12px;padding:6px 9px;border:1px solid var(--bdr);border-radius:5px;background:var(--surf);color:var(--txt);font-family:inherit}
+.btn{font-size:12px;font-weight:700;padding:7px 16px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;transition:.12s}
+.btn:hover{opacity:.85}
+.mrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-bottom:18px}
+.mc{background:var(--surf);border:1px solid var(--bdr);border-radius:7px;padding:14px}
+.ml{font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
+.mv{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.md{font-size:11px;margin-top:4px;font-weight:500}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.neu{color:var(--mute)}
+.badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.bp{background:var(--pos-bg);color:var(--pos)}.bn{background:var(--neg-bg);color:var(--neg)}.bz{background:var(--surf2);color:var(--mute)}
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:8px;padding:18px;margin-bottom:14px}
+.ch{font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:900px){.two,.three{grid-template-columns:1fr}}
+.cw{position:relative}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:7px 10px;font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--bdr);white-space:nowrap;text-align:left}
+td{padding:7px 10px;border-bottom:1px solid var(--bdr);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surf2)}
+.tr{text-align:right}
+/* GROUP SEPARATORS */
+th.gs,td.gs{border-left:2.5px solid var(--bdr);padding-left:12px}
+th.gh{background:var(--surf2);text-align:center;border-left:2.5px solid var(--bdr)}
+.tot td{font-weight:700;background:var(--surf2)}
+.hl td{font-weight:700;background:var(--gold-lt)}
+.pb-w{background:var(--surf2);border-radius:3px;height:5px;overflow:hidden;min-width:80px}
+.pb{height:100%;border-radius:3px;transition:width .4s}
+.note{font-size:11px;color:var(--mute);background:var(--surf2);border-radius:6px;padding:10px 14px;line-height:1.6;margin-top:12px}
+.note a{color:var(--blue);text-decoration:none}
+.upt-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+.upt-c{background:var(--surf2);border-radius:7px;padding:13px}
+.upt-s{font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase;margin-bottom:9px}
+.upt-r{display:flex;align-items:center;gap:7px;margin-bottom:5px;font-size:11px}
+.upt-l{min-width:34px;color:var(--mute)}
+.upt-bg{flex:1;background:var(--bdr);border-radius:3px;height:6px;overflow:hidden}
+.upt-f{height:100%;border-radius:3px}
+.upt-v{min-width:32px;text-align:right;font-weight:600}
+.data-status{display:flex;align-items:center;gap:8px;font-size:11px;padding:8px 12px;border-radius:6px;margin-bottom:14px}
+.ds-live{background:#E3F5EA;color:#1E6B3C}
+.ds-cached{background:var(--gold-lt);color:#7A5A2A}
+.pulse{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.coming{text-align:center;padding:60px 30px}
+.coming svg{width:40px;height:40px;color:var(--mute);margin-bottom:14px}
+.coming h3{font-size:16px;font-weight:700;margin-bottom:8px}
+.coming p{font-size:13px;color:var(--mute);max-width:380px;margin:0 auto;line-height:1.6}
+.rm{display:flex;flex-direction:column;gap:8px;margin:20px auto 0;max-width:260px;text-align:left}
+.rmi{display:flex;align-items:center;gap:9px;font-size:12px}
+.rmd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="shell"><nav class="sb">
+  <div class="logo">
+    <div class="logo-a">A Secret Knowledge</div>
+    <div class="logo-b">Operations Dashboard</div>
+  </div>
+  <div class="nav">
+    <div class="ng">Аналитика</div>
+    <div class="ni on" onclick="go('kpi',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      KPI by Periods
+    </div>
+    <div class="ni" onclick="go('acc',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+      Накопительно
+    </div>
+    <div class="ni" onclick="go('plan',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      План 2026
+    </div>
+    <div class="ni" onclick="go('mp',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 2.3c-.6.6-.2 1.7.7 1.7H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+      МП — Маркетплейсы
+    </div>
+    <div class="ng" style="margin-top:8px">Управление</div>
+    <div class="ni" onclick="go('prod',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      Производство
+    </div>
+  </div>
+  <div class="sbf">
+    <a href="https://docs.google.com/spreadsheets/d/1lD6aXd6rhU0C2rq90lIW51QxoPNhOyIM7ykKqoXoprQ" target="_blank">Продажи (Мой Склад)</a><br>
+    <a href="https://docs.google.com/spreadsheets/d/1QHwWzu9nVOKJLjwGqRyFk1dnEiXEW7sbx9A-0lflKiw" target="_blank">Бюджет 2026</a><br>
+    <a href="https://docs.google.com/spreadsheets/d/1xPmSgd1-DzDtD0wijtYjjAm9SbplSoxMGpNsQ9eERv8" target="_blank">План / Трафик</a>
+  </div>
+</nav>
+<main class="main"><div id="tab-kpi" class="tab on">
+<div class="ph">
+  <h1>KPI by Periods</h1>
+  <p>Все KPI по компании в сравнении трёх периодов</p>
+  <div class="src-row">
+    <a class="sb-btn s-g" href="https://docs.google.com/spreadsheets/d/1lD6aXd6rhU0C2rq90lIW51QxoPNhOyIM7ykKqoXoprQ/edit#gid=1654447134" target="_blank">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>Данные продаж
+    </a>
+    <a class="sb-btn s-gold" href="https://docs.google.com/spreadsheets/d/1xPmSgd1-DzDtD0wijtYjjAm9SbplSoxMGpNsQ9eERv8#gid=41518536" target="_blank">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>Внести план
+    </a>
+    <a class="sb-btn s-b" href="https://docs.google.com/spreadsheets/d/1xPmSgd1-DzDtD0wijtYjjAm9SbplSoxMGpNsQ9eERv8#gid=0" target="_blank">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Внести трафик
+    </a>
+  </div>
+</div>
+
+<div id="data-status" class="data-status ds-cached">
+  <div class="pulse"></div>
+  <span id="status-text">Данные из Google Sheets API загружаются...</span>
+</div>
+
+<div class="cbar">
+  <div class="cg">
+    <div class="cl"><span class="pdot p1c"></span>Период 1 (текущий)</div>
+    <div style="display:flex;gap:6px">
+      <input type="date" id="kp1s" value="2026-06-15"> &ndash; <input type="date" id="kp1e" value="2026-06-21">
+    </div>
+  </div>
+  <div class="cg">
+    <div class="cl"><span class="pdot p2c"></span>Период 2 (пред. нед.)</div>
+    <div style="display:flex;gap:6px">
+      <input type="date" id="kp2s" value="2026-06-08"> &ndash; <input type="date" id="kp2e" value="2026-06-14">
+    </div>
+  </div>
+  <div class="cg">
+    <div class="cl"><span class="pdot p3c"></span>Период 3 (г/г)</div>
+    <div style="display:flex;gap:6px">
+      <input type="date" id="kp3s" value="2025-06-16"> &ndash; <input type="date" id="kp3e" value="2025-06-22">
+    </div>
+  </div>
+  <button class="btn" onclick="renderKpi()">Применить</button>
+</div>
+
+<div class="mrow" id="kpi-m"></div>
+
+<div class="two">
+  <div class="card"><div class="ch">Товарооборот П1 vs П2 vs П3</div><div class="cw" style="height:210px"><canvas id="ch-k1"></canvas></div></div>
+  <div class="card"><div class="ch">Факт vs план (скорр.)</div><div class="cw" style="height:210px"><canvas id="ch-k2"></canvas></div></div>
+</div>
+
+<div class="card">
+  <div class="ch">UPT — доля чеков (Период 1)</div>
+  <div class="upt-g" id="upt-cards"></div>
+  <div style="border-top:2px solid var(--bdr);padding-top:12px;margin-top:4px">
+    <div class="ch">Сравнение по точкам</div>
+    <div class="cw" style="height:150px"><canvas id="ch-upt"></canvas></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch">Детализация KPI — все точки, все периоды</div>
+  <div class="tw">
+  <table>
+    <thead>
+      <tr>
+        <th rowspan="2">Точка / Канал</th>
+        <th class="gh" colspan="5">📊 Товарооборот</th>
+        <th class="gh" colspan="4">📦 Единицы</th>
+        <th class="gh" colspan="3">🧾 Чеки</th>
+        <th class="gh" colspan="3">💰 Ср. чек</th>
+        <th class="gh" colspan="3">👥 Трафик</th>
+        <th class="gh" colspan="3">🎯 CR</th>
+      </tr>
+      <tr>
+        <th class="gs">План*</th><th>П1</th><th>П2</th><th>П3</th><th>% пл</th>
+        <th class="gs">П1</th><th>П2</th><th>П3</th><th>% пл</th>
+        <th class="gs">П1</th><th>П2</th><th>П3</th>
+        <th class="gs">П1</th><th>П2</th><th>П3</th>
+        <th class="gs">П1</th><th>П2</th><th>П3</th>
+        <th class="gs">П1</th><th>П2</th><th>П3</th>
+      </tr>
+    </thead>
+    <tbody id="kpi-body"></tbody>
+  </table>
+  </div>
+  <div class="note">* план = бюджет месяца × (дней / дней в месяце) &nbsp;|&nbsp; Данные из <a href="https://docs.google.com/spreadsheets/d/1lD6aXd6rhU0C2rq90lIW51QxoPNhOyIM7ykKqoXoprQ" target="_blank">Мой Склад</a> через Google Sheets API — обновляются автоматически &nbsp;|&nbsp; Трафик: <a href="https://docs.google.com/spreadsheets/d/1xPmSgd1-DzDtD0wijtYjjAm9SbplSoxMGpNsQ9eERv8" target="_blank">ASK KPI v5</a></div>
+</div>
+</div><div id="tab-acc" class="tab">
+<div class="ph">
+  <h1>Накопительно (месяц)</h1>
+  <p>Факт нарастающим итогом: офлайн / сайт / онлайн (МП) / B2B</p>
+</div>
+<div class="cbar">
+  <div class="cg"><div class="cl">Начало месяца</div><input type="date" id="as" value="2026-06-01"></div>
+  <div class="cg"><div class="cl">По дату (сегодня)</div><input type="date" id="ae" value="2026-06-21"></div>
+  <button class="btn" onclick="renderAcc()">Применить</button>
+</div>
+<div class="mrow" id="acc-m"></div>
+<div class="three" id="acc-ch"></div>
+<div class="two">
+  <div class="card"><div class="ch">Факт vs план по месяцам 2026</div><div class="cw" style="height:210px"><canvas id="ch-a1"></canvas></div></div>
+  <div class="card"><div class="ch">% выполнения — месяц к месяцу</div><div class="cw" style="height:210px"><canvas id="ch-a2"></canvas></div></div>
+</div>
+<div class="card">
+  <div class="ch">Все каналы — детализация</div>
+  <div class="tw">
+  <table>
+    <thead><tr>
+      <th>Канал</th>
+      <th class="tr gs">ТО план</th><th class="tr">ТО факт</th><th class="tr">% план</th>
+      <th class="tr gs">Ед план</th><th class="tr">Ед факт</th><th class="tr">% план</th>
+      <th class="tr gs">Чеки план</th><th class="tr">Чеки факт</th><th class="tr">% план</th>
+      <th class="tr gs">Трафик</th><th class="tr">CR</th>
+      <th class="tr gs">Ср. чек</th><th class="tr">Ср. цена</th>
+      <th style="min-width:100px">Прогресс ТО</th>
+    </tr></thead>
+    <tbody id="acc-body"></tbody>
+  </table>
+  </div>
+</div>
+</div><div id="tab-plan" class="tab">
+<div class="ph">
+  <h1>План продаж 2026</h1>
+  <p>Бюджет vs факт по месяцам — вся компания</p>
+  <div class="src-row">
+    <a class="sb-btn s-gold" href="https://docs.google.com/spreadsheets/d/1QHwWzu9nVOKJLjwGqRyFk1dnEiXEW7sbx9A-0lflKiw#gid=47630601" target="_blank">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>Редактировать бюджет
+    </a>
+    <a class="sb-btn s-g" href="https://docs.google.com/spreadsheets/d/1lD6aXd6rhU0C2rq90lIW51QxoPNhOyIM7ykKqoXoprQ" target="_blank">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>Источник факта
+    </a>
+  </div>
+</div>
+<div class="mrow" id="plan-m"></div>
+<div class="two">
+  <div class="card"><div class="ch">Товарооборот — бюджет vs факт 2026</div><div class="cw" style="height:230px"><canvas id="ch-p1"></canvas></div></div>
+  <div class="card"><div class="ch">Единицы — бюджет vs факт 2026</div><div class="cw" style="height:230px"><canvas id="ch-p2"></canvas></div></div>
+</div>
+<div class="two">
+  <div class="card"><div class="ch">Средний чек — бюджет vs факт 2026</div><div class="cw" style="height:210px"><canvas id="ch-p3"></canvas></div></div>
+  <div class="card"><div class="ch">Конверсия % — бюджет vs факт 2026</div><div class="cw" style="height:210px"><canvas id="ch-p4"></canvas></div></div>
+</div>
+<div class="card">
+  <div class="ch">Сводная таблица по всем KPI — 2026</div>
+  <div class="tw">
+  <table>
+    <thead><tr>
+      <th>Месяц</th>
+      <th class="tr gs">ТО бюджет</th><th class="tr">ТО факт</th><th class="tr">% план</th><th class="tr">% г/г</th>
+      <th class="tr gs">Ед бюджет</th><th class="tr">Ед факт</th><th class="tr">% план</th>
+      <th class="tr gs">Чеки план</th><th class="tr">Чеки факт</th>
+      <th class="tr gs">Трафик план</th><th class="tr">Трафик факт</th>
+      <th class="tr gs">CR план</th><th class="tr">CR факт</th>
+      <th class="tr gs">Ср.чек план</th><th class="tr">Ср.чек факт</th>
+    </tr></thead>
+    <tbody id="plan-body"></tbody>
+  </table>
+  </div>
+</div>
+</div><div id="tab-mp" class="tab">
+<div class="ph">
+  <h1>МП — Маркетплейсы</h1>
+  <p>Lamoda + Золотое яблоко</p>
+  <div class="src-row">
+    <a class="sb-btn s-gold" href="https://docs.google.com/spreadsheets/d/1xPmSgd1-DzDtD0wijtYjjAm9SbplSoxMGpNsQ9eERv8" target="_blank">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>Внести данные МП
+    </a>
+  </div>
+</div>
+<div class="card" style="background:var(--gold-lt);border-color:var(--gold)">
+  <div class="ch">Приоритет источника данных</div>
+  <table>
+    <thead><tr><th>#</th><th>Источник</th><th>Когда</th><th>Статус</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge bp">1</span></td><td><strong>Отчёт комиссионера</strong></td><td>Закрытый месяц — финальные данные</td><td><span class="badge bz">Ввод в GSheets</span></td></tr>
+      <tr><td><span class="badge" style="background:var(--gold-lt);color:#7A5A2A">2</span></td><td>Еженедельный ввод</td><td>Оперативно в течение месяца</td><td><span class="badge bz">Ввод в GSheets</span></td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="mrow" id="mp-m"></div>
+<div class="two">
+  <div class="card"><div class="ch">Lamoda — бюджет vs факт 2026</div><div class="cw" style="height:200px"><canvas id="ch-mp1"></canvas></div></div>
+  <div class="card"><div class="ch">Золотое яблоко — бюджет vs факт 2026</div><div class="cw" style="height:200px"><canvas id="ch-mp2"></canvas></div></div>
+</div>
+</div><div id="tab-prod" class="tab">
+<div class="ph"><h1>Производство</h1><p>Приказы, ОТК, эффективность — в разработке</p></div>
+<div class="card">
+  <div class="coming">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+    <h3>Модуль производства</h3>
+    <p>Раздел будет включать приказы в работе, статусы ОТК, KPI сотрудников и контроль себестоимости.</p>
+    <div class="rm">
+      <div class="rmi"><div class="rmd" style="background:#1E6B3C"></div>Приказы в производстве</div>
+      <div class="rmi"><div class="rmd" style="background:#B8935A"></div>ОТК: проверка / принят / брак</div>
+      <div class="rmi"><div class="rmd" style="background:#1A4A8A"></div>KPI сотрудников</div>
+      <div class="rmi"><div class="rmd" style="background:#A8200D"></div>Себестоимость / отклонения</div>
+    </div>
+  </div>
+</div>
+</div>
+</main>
+</div><script>
+const MONTHS=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+
+// ── РЕАЛЬНЫЕ ДАННЫЕ ИЗ ТАБЛИЦ ─────────────────────────────────────────
+// Источник: ASK_Бюджет_выручка_2026 (лист total, строки Бюджет/Факт 2026)
+const B = {
+  to:     [20494120, 20224803, 32298306, 29934400, 26740940, 28522374, 25986032, 28353700, 21221251, 20937329, 21251816, 32205116],
+  to_f:   [17289838, 21909854, 38328803, 24605521, 29128100, 0, 0, 0, 0, 0, 0, 0],
+  to_25:  [18092652, 18121156, 29733552, 22756334, 21102577, 23193162, 21347353, 24497180, 17343206, 16509029, 18922807, 28746661],
+  ed:     [5845, 5354, 8966, 8127, 7646, 8396, 7355, 8561, 5984, 5737, 5243, 8448],
+  ed_f:   [4314, 5837, 10151, 7023, 8551, 0, 0, 0, 0, 0, 0, 0],
+  chk:    [1793, 1873, 2889, 2838, 2514, 2842, 2181, 2851, 1814, 1766, 1924, 2825],
+  chk_f:  [1759, 2117, 3611, 2557, 2997, 0, 0, 0, 0, 0, 0, 0],
+  tr:     [46919, 50876, 58214, 57700, 57475, 52615, 47706, 59301, 47039, 42188, 45332, 58489],
+  tr_f:   [48411, 56702, 69852, 58625, 58226, 0, 0, 0, 0, 0, 0, 0],
+  cr:     [0.0382, 0.0368, 0.0496, 0.0492, 0.0437, 0.054000000000000006, 0.045700000000000005, 0.0481, 0.038599999999999995, 0.04190000000000001, 0.0424, 0.0483],
+  cr_f:   [0.0363, 0.0373, 0.051699999999999996, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+  ap:     [3890, 4199, 3779, 3683, 4352, 4112, 3601, 3267, 3718, 4009, 3864, 4117],
+  ap_f:   [4008, 3754, 3776, 3504, 3406, 0, 0, 0, 0, 0, 0, 0],
+  ac:     [12925, 12002, 11727, 10548, 13239, 12148, 12143, 9809, 12266, 13023, 10529, 12312],
+  ac_f:   [9829, 10349, 10614, 9623, 9718, 0, 0, 0, 0, 0, 0, 0],
+};
+
+// Данные продаж из Google Sheets (Мой Склад — лист Продажи позиции)
+// Тип D: "Розничная продажа" = офлайн, "Отгрузка" = интернет
+// Загружаем через публичный CSV-экспорт
+const SALES_GID = "1654447134"; // gid листа Продажи (позиции)
+const SHEET_ID  = "1lD6aXd6rhU0C2rq90lIW51QxoPNhOyIM7ykKqoXoprQ";
+
+// Агрегированные данные — будут заполнены после загрузки из Sheets
+let salesData = null;
+let dataLoaded = false;
+
+async function loadSalesFromSheets() {
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SALES_GID}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const csv = await res.text();
+    const rows = csv.split('\n').slice(1).map(r => {
+      // Parse CSV properly (handle quoted fields)
+      const cols = []; let cur = ''; let inQ = false;
+      for (let i = 0; i < r.length; i++) {
+        if (r[i] === '"') { inQ = !inQ; }
+        else if (r[i] === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+        else cur += r[i];
+      }
+      cols.push(cur.trim());
+      return cols;
+    }).filter(r => r.length > 5 && r[3]); // filter empty rows
+
+    // Aggregate by date and type
+    // col D (idx 3) = doc type, col F (idx 5) = date, col M (idx 12) = qty, col O (idx 14) = sum
+    const byDate = {};
+    rows.forEach(r => {
+      const docType = r[3] || '';
+      const dateStr = (r[5] || '').split(' ')[0]; // "21.06.2026"
+      if (!dateStr || !dateStr.match(/\d{2}\.\d{2}\.\d{4}/)) return;
+      const [d, m, y] = dateStr.split('.');
+      const dateKey = `${y}-${m}-${d}`;
+      const qty = parseFloat((r[12] || '0').replace(',', '.')) || 0;
+      const sum = parseFloat((r[14] || '0').replace(',', '.')) || 0;
+      if (!byDate[dateKey]) byDate[dateKey] = { retail_sum:0, retail_qty:0, retail_docs:new Set(), online_sum:0, online_qty:0 };
+      if (docType.includes('Розничная')) {
+        byDate[dateKey].retail_sum += sum;
+        byDate[dateKey].retail_qty += qty;
+        byDate[dateKey].retail_docs.add(r[2]); // doc ID for cheki count
+      } else if (docType.includes('Отгрузка')) {
+        byDate[dateKey].online_sum += sum;
+        byDate[dateKey].online_qty += qty;
+      }
+    });
+    // Convert Sets to counts
+    Object.values(byDate).forEach(d => { d.retail_cheki = d.retail_docs.size; delete d.retail_docs; });
+    salesData = byDate;
+    dataLoaded = true;
+    document.getElementById('status-text').textContent = `✓ Данные загружены из Google Sheets (${Object.keys(byDate).length} дней)`;
+    document.getElementById('data-status').className = 'data-status ds-live';
+    renderKpi();
+  } catch(e) {
+    console.warn('Sheets load failed:', e.message);
+    document.getElementById('status-text').textContent = '⚠ Данные из кэша (не удалось подключиться к Google Sheets)';
+    salesData = {};
+    renderKpi();
+  }
+}
+
+function sumRange(start, end, field) {
+  if (!salesData) return 0;
+  let total = 0;
+  const s = new Date(start), e = new Date(end);
+  for (const [dateKey, d] of Object.entries(salesData)) {
+    const dt = new Date(dateKey);
+    if (dt >= s && dt <= e) total += d[field] || 0;
+  }
+  return total;
+}
+
+function chekiRange(start, end) {
+  if (!salesData) return 0;
+  let total = 0;
+  const s = new Date(start), e = new Date(end);
+  for (const [dateKey, d] of Object.entries(salesData)) {
+    const dt = new Date(dateKey);
+    if (dt >= s && dt <= e) total += d.retail_cheki || 0;
+  }
+  return total;
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────
+let charts = {};
+function dc(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
+function fmt(n) { if(!n && n!==0) return '—'; return Math.round(n).toLocaleString('ru'); }
+function fmtP(v) { if(!isFinite(v) || isNaN(v)) return '—'; return (Math.round(v*1000)/10).toFixed(1)+'%'; }
+function badge(v) {
+  if(v===null||v===undefined||!isFinite(v)||isNaN(v)) return '<span class="badge bz">—</span>';
+  const p = Math.round(v*100);
+  return p>=0 ? `<span class="badge bp">+${p}%</span>` : `<span class="badge bn">${p}%</span>`;
+}
+function pb(pct) {
+  const w = Math.min(100, Math.max(0, Math.round(pct*100)));
+  const c = pct>=1?'#1E6B3C':pct>=0.5?'#B8935A':'#A8200D';
+  return `<div class="pb-w"><div class="pb" style="width:${w}%;background:${c}"></div></div><div style="font-size:10px;color:var(--mute);margin-top:2px">${Math.round(pct*100)}%</div>`;
+}
+function daysC(s,e) { return Math.max(1, Math.round((new Date(e)-new Date(s))/864e5)+1); }
+function mIdx(d) { return new Date(d).getMonth(); }
+function dIM(d) { const dt=new Date(d); return new Date(dt.getFullYear(),dt.getMonth()+1,0).getDate(); }
+
+function go(id, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('tab-'+id).classList.add('on');
+  el.classList.add('on');
+  if(id==='kpi') renderKpi();
+  else if(id==='acc') renderAcc();
+  else if(id==='plan') renderPlan();
+  else if(id==='mp') renderMp();
+}
+
+// ── KPI ─────────────────────────────────────────────────────────────────
+function renderKpi() {
+  const p1s=document.getElementById('kp1s').value, p1e=document.getElementById('kp1e').value;
+  const p2s=document.getElementById('kp2s').value, p2e=document.getElementById('kp2e').value;
+  const p3s=document.getElementById('kp3s').value, p3e=document.getElementById('kp3e').value;
+  const mi=mIdx(p1s), d=daysC(p1s,p1e), dim=dIM(p1s), ratio=d/dim;
+
+  // Get real sales data
+  const to1 = sumRange(p1s,p1e,'retail_sum') + sumRange(p1s,p1e,'online_sum');
+  const to2 = sumRange(p2s,p2e,'retail_sum') + sumRange(p2s,p2e,'online_sum');
+  const to3 = sumRange(p3s,p3e,'retail_sum') + sumRange(p3s,p3e,'online_sum');
+  const ed1 = sumRange(p1s,p1e,'retail_qty') + sumRange(p1s,p1e,'online_qty');
+  const ed2 = sumRange(p2s,p2e,'retail_qty') + sumRange(p2s,p2e,'online_qty');
+  const ed3 = sumRange(p3s,p3e,'retail_qty') + sumRange(p3s,p3e,'online_qty');
+  const ck1 = chekiRange(p1s,p1e);
+  const ck2 = chekiRange(p2s,p2e);
+  const ck3 = chekiRange(p3s,p3e);
+
+  const plan_to  = Math.round((B.to[mi]||0)*ratio);
+  const plan_ed  = Math.round((B.ed[mi]||0)*ratio);
+  const plan_ck  = Math.round((B.chk[mi]||0)*ratio);
+  const plan_tr  = Math.round((B.tr[mi]||0)*ratio);
+  const plan_cr  = B.cr[mi]||0;
+  const plan_ac  = B.ac[mi]||0;
+  const plan_ap  = B.ap[mi]||0;
+
+  const upt1 = ck1>0?ed1/ck1:0;
+  const ac1  = ck1>0?to1/ck1:0;
+  const ap1  = ed1>0?to1/ed1:0;
+  const dPlan = plan_to>0?(to1-plan_to)/plan_to:null;
+  const dPrev = to2>0?(to1-to2)/to2:null;
+  const dYoy  = to3>0?(to1-to3)/to3:null;
+
+  document.getElementById('kpi-m').innerHTML = `
+    <div class="mc"><div class="ml">ТО П1 (факт)</div><div class="mv">${fmt(to1)}</div><div class="md">${badge(dPlan)} к плану</div></div>
+    <div class="mc"><div class="ml">План (${d} / ${dim} дн)</div><div class="mv">${fmt(plan_to)}</div></div>
+    <div class="mc"><div class="ml">vs П2</div><div class="mv">${fmt(to2)}</div><div class="md">${badge(dPrev)}</div></div>
+    <div class="mc"><div class="ml">vs П3 (г/г)</div><div class="mv">${fmt(to3)}</div><div class="md">${badge(dYoy)}</div></div>
+    <div class="mc"><div class="ml">Чеки П1</div><div class="mv">${fmt(ck1)}</div></div>
+    <div class="mc"><div class="ml">Единицы П1</div><div class="mv">${fmt(ed1)}</div></div>
+    <div class="mc"><div class="ml">UPT П1</div><div class="mv">${upt1>0?upt1.toFixed(2):'—'}</div></div>
+    <div class="mc"><div class="ml">Ср. чек П1</div><div class="mv">${ac1>0?fmt(ac1):'—'}</div></div>
+  `;
+
+  // Full table with all 3 periods for each metric
+  const STORE_ROW = {
+    'TOTAL (все каналы)': {to1,to2,to3,ed1,ed2,ed3,ck1,ck2,ck3,
+      plan_to,plan_ed,plan_ck,
+      tr1:B.tr_f[mi]||0,tr2:0,tr3:0,
+      cr1:B.cr_f[mi]||0,cr2:0,cr3:0,
+      ac1,ac2:ck2>0?to2/ck2:0,ac3:ck3>0?to3/ck3:0,
+      isTotal:true},
+  };
+
+  document.getElementById('kpi-body').innerHTML = Object.entries(STORE_ROW).map(([name,r])=>{
+    const pp_to = r.plan_to>0?(r.to1-r.plan_to)/r.plan_to:null;
+    const pp_ed = r.plan_ed>0?(r.ed1-r.plan_ed)/r.plan_ed:null;
+    return `<tr class="${r.isTotal?'hl':''}">
+      <td><strong>${name}</strong></td>
+      <td class="tr gs">${fmt(r.plan_to)}</td><td class="tr">${fmt(r.to1)}</td><td class="tr">${fmt(r.to2)}</td><td class="tr">${fmt(r.to3)}</td><td class="tr">${badge(pp_to)}</td>
+      <td class="tr gs">${fmt(r.ed1)}</td><td class="tr">${fmt(r.ed2)}</td><td class="tr">${fmt(r.ed3)}</td><td class="tr">${badge(pp_ed)}</td>
+      <td class="tr gs">${fmt(r.ck1)}</td><td class="tr">${fmt(r.ck2)}</td><td class="tr">${fmt(r.ck3)}</td>
+      <td class="tr gs">${r.ac1>0?fmt(r.ac1):'—'}</td><td class="tr">${r.ac2>0?fmt(r.ac2):'—'}</td><td class="tr">${r.ac3>0?fmt(r.ac3):'—'}</td>
+      <td class="tr gs">${r.tr1>0?fmt(r.tr1):'—'}</td><td class="tr">${r.tr2>0?fmt(r.tr2):'—'}</td><td class="tr">${r.tr3>0?fmt(r.tr3):'—'}</td>
+      <td class="tr gs">${r.cr1>0?fmtP(r.cr1):'—'}</td><td class="tr">${r.cr2>0?fmtP(r.cr2):'—'}</td><td class="tr">${r.cr3>0?fmtP(r.cr3):'—'}</td>
+    </tr>`;
+  }).join('');
+
+  // UPT placeholders (need Позиции sheet breakdown)
+  const OFFLINE = ['Тренд Айленд','Цветной','Покровка','Питер'];
+  document.getElementById('upt-cards').innerHTML = OFFLINE.map(s=>{
+    return`<div class="upt-c">
+      <div class="upt-s">${s}</div>
+      <div style="font-size:11px;color:var(--mute)">Данные из листа<br>«Продажи (позиции)»<br>загружаются...</div>
+    </div>`;
+  }).join('');
+
+  // Charts
+  dc('ch-k1'); dc('ch-k2');
+  charts['ch-k1']=new Chart(document.getElementById('ch-k1'),{type:'bar',
+    data:{labels:['П1 (текущий)','П2 (пред.нед.)','П3 (г/г)'],datasets:[
+      {label:'ТО',data:[to1,to2,to3],backgroundColor:['#1A4A8A','#B8935A','#D3D1C7']},
+      {label:'план П1',data:[plan_to,null,null],type:'line',borderColor:'#B8935A',borderWidth:2.5,pointRadius:6,fill:false,backgroundColor:'transparent',borderDash:[5,3]},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmt(v),font:{size:10}}}}}
+  });
+  charts['ch-k2']=new Chart(document.getElementById('ch-k2'),{type:'bar',
+    data:{labels:['ТО','Единицы','Чеки'],datasets:[
+      {label:'% к плану',data:[plan_to>0?(to1/plan_to*100):0,plan_ed>0?(ed1/plan_ed*100):0,plan_ck>0?(ck1/plan_ck*100):0],backgroundColor:d=>[plan_to>0&&to1>=plan_to,plan_ed>0&&ed1>=plan_ed,plan_ck>0&&ck1>=plan_ck].map(ok=>ok?'#1E6B3C':'#A8200D')},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%',font:{size:10}},min:0}}}
+  });
+  dc('ch-upt');
+  charts['ch-upt']=new Chart(document.getElementById('ch-upt'),{type:'bar',
+    data:{labels:OFFLINE,datasets:[{label:'Загрузка...',data:[0,0,0,0],backgroundColor:'#D3D1C7'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%'}}}}
+  });
+}
+
+// ── НАКОПИТЕЛЬНО ─────────────────────────────────────────────────────────
+function renderAcc() {
+  const s=document.getElementById('as').value, e=document.getElementById('ae').value;
+  const mi=mIdx(s), d=daysC(s,e), dim=dIM(s), ratio=d/dim;
+
+  const to_plan  = Math.round((B.to[mi]||0)*ratio);
+  const to_fact  = sumRange(s,e,'retail_sum') + sumRange(s,e,'online_sum');
+  const ed_plan  = Math.round((B.ed[mi]||0)*ratio);
+  const ed_fact  = sumRange(s,e,'retail_qty') + sumRange(s,e,'online_qty');
+  const ck_plan  = Math.round((B.chk[mi]||0)*ratio);
+  const ck_fact  = chekiRange(s,e);
+  const tr_plan  = Math.round((B.tr[mi]||0)*ratio);
+  const tr_fact  = B.tr_f[mi]||0;
+  const cr_fact  = B.cr_f[mi]||0;
+  const ac_fact  = ck_fact>0?Math.round(to_fact/ck_fact):0;
+  const ap_fact  = ed_fact>0?Math.round(to_fact/ed_fact):0;
+
+  const pct_to = to_plan>0?to_fact/to_plan:0;
+  const pct_ed = ed_plan>0?ed_fact/ed_plan:0;
+  const pct_ck = ck_plan>0?ck_fact/ck_plan:0;
+
+  document.getElementById('acc-m').innerHTML = `
+    <div class="mc"><div class="ml">ТО факт</div><div class="mv">${fmt(to_fact)}</div><div class="md neu">${d} дн из ${dim}</div></div>
+    <div class="mc"><div class="ml">ТО план (скорр.)</div><div class="mv">${fmt(to_plan)}</div></div>
+    <div class="mc"><div class="ml">% ТО план</div><div class="mv ${pct_to>=1?'pos':'neg'}">${fmtP(pct_to)}</div></div>
+    <div class="mc"><div class="ml">Чеки факт</div><div class="mv">${fmt(ck_fact)}</div></div>
+    <div class="mc"><div class="ml">Единицы факт</div><div class="mv">${fmt(ed_fact)}</div></div>
+    <div class="mc"><div class="ml">Средний чек</div><div class="mv">${fmt(ac_fact)}</div></div>
+    <div class="mc"><div class="ml">Трафик</div><div class="mv">${fmt(tr_fact)}</div></div>
+    <div class="mc"><div class="ml">CR</div><div class="mv">${cr_fact>0?fmtP(cr_fact):'—'}</div></div>
+    <div class="mc"><div class="ml">B2B + ОПТ</div><div class="mv">—</div><div class="md neu">Ввод вручную</div></div>
+  `;
+
+  // Channel blocks
+  document.getElementById('acc-ch').innerHTML = [
+    {k:'Офлайн 🏪', sub:'Розничные продажи', to:sumRange(s,e,'retail_sum'), plan:Math.round((B.to[mi]||0)*ratio*0.72)},
+    {k:'МП (Ламода+ЗЯ) 📦', sub:'Маркетплейсы', to:0, plan:Math.round((B.to[mi]||0)*ratio*0.13)},
+    {k:'Сайт 🌐', sub:'Интернет-магазин', to:sumRange(s,e,'online_sum'), plan:Math.round((B.to[mi]||0)*ratio*0.15)},
+  ].map(ch=>{
+    const pct=ch.plan>0?ch.to/ch.plan:0;
+    return`<div class="card" style="margin-bottom:0">
+      <div class="ch">${ch.k}</div>
+      <div style="font-size:11px;color:var(--mute);margin-bottom:10px">${ch.sub}</div>
+      <div style="font-size:22px;font-weight:700;margin-bottom:4px">${fmt(ch.to)}</div>
+      <div style="font-size:12px;color:var(--mute);margin-bottom:8px">план: ${fmt(ch.plan)}</div>
+      ${pb(pct)}
+    </div>`;
+  }).join('');
+
+  // Table
+  const rows = [
+    {lbl:'Розничные продажи (офлайн)', to_f:sumRange(s,e,'retail_sum'), ed_f:sumRange(s,e,'retail_qty'), ck_f:chekiRange(s,e), tr_f:tr_fact, cr_f, ac_f:ac_fact, ap_f, to_p:Math.round(to_plan*0.72), ed_p:Math.round(ed_plan*0.72), ck_p:Math.round(ck_plan*0.72), tr_p:Math.round(tr_plan*0.72), isT:false},
+    {lbl:'Интернет (Отгрузки)', to_f:sumRange(s,e,'online_sum'), ed_f:sumRange(s,e,'online_qty'), ck_f:0, tr_f:0, cr_f:0, ac_f:0, ap_f:0, to_p:Math.round(to_plan*0.15), ed_p:Math.round(ed_plan*0.15), ck_p:0, tr_p:0, isT:false},
+    {lbl:'МП (из отчёта/ввода)', to_f:0, ed_f:0, ck_f:0, tr_f:0, cr_f:0, ac_f:0, ap_f:0, to_p:Math.round(to_plan*0.13), ed_p:Math.round(ed_plan*0.13), ck_p:0, tr_p:0, isT:false},
+    {lbl:'B2B + ОПТ', to_f:0, ed_f:0, ck_f:0, tr_f:0, cr_f:0, ac_f:0, ap_f:0, to_p:0, ed_p:0, ck_p:0, tr_p:0, isT:false},
+    {lbl:'TOTAL COMPANY', to_f:to_fact, ed_f:ed_fact, ck_f:ck_fact, tr_f:tr_fact, cr_f, ac_f:ac_fact, ap_f, to_p:to_plan, ed_p:ed_plan, ck_p:ck_plan, tr_p:tr_plan, isT:true},
+  ];
+  document.getElementById('acc-body').innerHTML = rows.map(r=>{
+    const pp=r.to_p>0?r.to_f/r.to_p:0, pe=r.ed_p>0?r.ed_f/r.ed_p:0, pc=r.ck_p>0?r.ck_f/r.ck_p:0;
+    return `<tr class="${r.isT?'hl':''}">
+      <td>${r.lbl}</td>
+      <td class="tr gs">${fmt(r.to_p)}</td><td class="tr">${fmt(r.to_f)}</td><td class="tr"><span class="${pp>=1?'pos':'neg'}">${r.to_p?fmtP(pp):'—'}</span></td>
+      <td class="tr gs">${fmt(r.ed_p)}</td><td class="tr">${fmt(r.ed_f)}</td><td class="tr"><span class="${pe>=1?'pos':'neg'}">${r.ed_p?fmtP(pe):'—'}</span></td>
+      <td class="tr gs">${fmt(r.ck_p)}</td><td class="tr">${fmt(r.ck_f)}</td><td class="tr"><span class="${pc>=1?'pos':'neg'}">${r.ck_p?fmtP(pc):'—'}</span></td>
+      <td class="tr gs">${r.tr_f>0?fmt(r.tr_f):'—'}</td><td class="tr">${r.cr_f>0?fmtP(r.cr_f):'—'}</td>
+      <td class="tr gs">${r.ac_f>0?fmt(r.ac_f):'—'}</td><td class="tr">${r.ap_f>0?fmt(r.ap_f):'—'}</td>
+      <td>${r.to_p?pb(pp):''}</td>
+    </tr>`;
+  }).join('');
+
+  // Charts
+  const mFacts=B.to_f.map(v=>v||0), mBuds=B.to;
+  dc('ch-a1'); dc('ch-a2');
+  charts['ch-a1']=new Chart(document.getElementById('ch-a1'),{type:'bar',
+    data:{labels:MONTHS,datasets:[
+      {label:'Факт 2026',data:mFacts,backgroundColor:'#1A4A8A'},
+      {label:'Бюджет 2026',data:mBuds,type:'line',borderColor:'#B8935A',borderWidth:2,pointRadius:3,fill:false,backgroundColor:'transparent'},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmt(v),font:{size:10}}}}}
+  });
+  const pcts=B.to_f.map((f,i)=>B.to[i]>0?Math.round(f/B.to[i]*100):0);
+  charts['ch-a2']=new Chart(document.getElementById('ch-a2'),{type:'bar',
+    data:{labels:MONTHS,datasets:[{label:'% плана',data:pcts,backgroundColor:pcts.map(p=>p>=100?'#1E6B3C':p>=50?'#B8935A':'#A8200D')}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%',font:{size:10}}}}}
+  });
+}
+
+// ── ПЛАН ─────────────────────────────────────────────────────────────────
+function renderPlan() {
+  const totalBud=B.to.reduce((a,b)=>a+b,0);
+  const totalFact=B.to_f.reduce((a,b)=>a+b,0);
+  const totalBud25=B.to_25.reduce((a,b)=>a+b,0);
+  const pct=totalBud>0?totalFact/totalBud:0;
+  const yoy=totalBud25>0?(totalFact-totalBud25)/totalBud25:null;
+  document.getElementById('plan-m').innerHTML=`
+    <div class="mc"><div class="ml">Бюджет 2026</div><div class="mv">${fmt(totalBud)}</div></div>
+    <div class="mc"><div class="ml">Факт 2026 (янв–май)</div><div class="mv">${fmt(totalFact)}</div></div>
+    <div class="mc"><div class="ml">% выполнения</div><div class="mv ${pct>=1?'pos':'neg'}">${fmtP(pct)}</div></div>
+    <div class="mc"><div class="ml">Осталось</div><div class="mv">${fmt(Math.max(0,totalBud-totalFact))}</div></div>
+    <div class="mc"><div class="ml">Факт 2025</div><div class="mv">${fmt(totalBud25)}</div></div>
+    <div class="mc"><div class="ml">% к 2025</div><div class="mv ${yoy&&yoy>=0?'pos':'neg'}">${yoy!==null?badge(yoy):'—'}</div></div>
+  `;
+  dc('ch-p1');dc('ch-p2');dc('ch-p3');dc('ch-p4');
+  charts['ch-p1']=new Chart(document.getElementById('ch-p1'),{type:'bar',
+    data:{labels:MONTHS,datasets:[
+      {label:'Факт 2026',data:B.to_f,backgroundColor:'#1A4A8A'},
+      {label:'Бюджет 2026',data:B.to,type:'line',borderColor:'#B8935A',borderWidth:2,pointRadius:3,fill:false,backgroundColor:'transparent'},
+      {label:'Факт 2025',data:B.to_25,type:'line',borderColor:'#AAA89E',borderWidth:1.5,pointRadius:2,fill:false,backgroundColor:'transparent',borderDash:[4,2]},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmt(v),font:{size:10}}}}}
+  });
+  charts['ch-p2']=new Chart(document.getElementById('ch-p2'),{type:'bar',
+    data:{labels:MONTHS,datasets:[
+      {label:'Факт',data:B.ed_f,backgroundColor:'#1A4A8A'},
+      {label:'Бюджет',data:B.ed,type:'line',borderColor:'#B8935A',borderWidth:2,pointRadius:3,fill:false,backgroundColor:'transparent'},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmt(v),font:{size:10}}}}}
+  });
+  charts['ch-p3']=new Chart(document.getElementById('ch-p3'),{type:'line',
+    data:{labels:MONTHS,datasets:[
+      {label:'Факт',data:B.ac_f,borderColor:'#1A4A8A',backgroundColor:'rgba(26,74,138,.1)',fill:true,tension:.3,pointRadius:4},
+      {label:'Бюджет',data:B.ac,borderColor:'#B8935A',fill:false,tension:.3,borderDash:[4,2],pointRadius:3},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmt(v),font:{size:10}}}}}
+  });
+  charts['ch-p4']=new Chart(document.getElementById('ch-p4'),{type:'line',
+    data:{labels:MONTHS,datasets:[
+      {label:'Факт',data:B.cr_f,borderColor:'#1A4A8A',backgroundColor:'rgba(26,74,138,.1)',fill:true,tension:.3,pointRadius:4},
+      {label:'Бюджет',data:B.cr,borderColor:'#B8935A',fill:false,tension:.3,borderDash:[4,2],pointRadius:3},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmtP(v),font:{size:10}}}}}
+  });
+
+  document.getElementById('plan-body').innerHTML=MONTHS.map((m,i)=>{
+    const bf=B.to[i],ff=B.to_f[i]||0,f25=B.to_25[i]||0;
+    const pp=bf>0?ff/bf:0,yoy=f25>0?(ff-f25)/f25:null;
+    return`<tr class="${ff>0?'':''}">
+      <td><strong>${m}</strong></td>
+      <td class="tr gs">${fmt(bf)}</td><td class="tr">${fmt(ff)}</td>
+      <td class="tr"><span class="${pp>=1?'pos':ff>0?'neg':'neu'}">${ff?fmtP(pp):'—'}</span></td>
+      <td class="tr">${badge(yoy)}</td>
+      <td class="tr gs">${fmt(B.ed[i])}</td><td class="tr">${fmt(B.ed_f[i]||0)}</td>
+      <td class="tr"><span class="${B.ed[i]>0&&(B.ed_f[i]||0)/B.ed[i]>=1?'pos':B.ed_f[i]>0?'neg':'neu'}">${B.ed_f[i]?fmtP((B.ed_f[i]||0)/B.ed[i]):'—'}</span></td>
+      <td class="tr gs">${fmt(B.chk[i])}</td><td class="tr">${fmt(B.chk_f[i]||0)}</td>
+      <td class="tr gs">${fmt(B.tr[i])}</td><td class="tr">${fmt(B.tr_f[i]||0)}</td>
+      <td class="tr gs">${fmtP(B.cr[i])}</td><td class="tr">${B.cr_f[i]?fmtP(B.cr_f[i]):'—'}</td>
+      <td class="tr gs">${fmt(B.ac[i])}</td><td class="tr">${B.ac_f[i]?fmt(B.ac_f[i]):'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── МП ───────────────────────────────────────────────────────────────────
+function renderMp() {
+  const laBud = B.to.map(v=>Math.round(v*0.07));
+  const zyBud = B.to.map(v=>Math.round(v*0.06));
+  document.getElementById('mp-m').innerHTML=`
+    <div class="mc"><div class="ml">Lamoda факт</div><div class="mv">—</div><div class="md neu">Из отчёта/ввода</div></div>
+    <div class="mc"><div class="ml">ЗЯ факт</div><div class="mv">—</div><div class="md neu">Из отчёта/ввода</div></div>
+    <div class="mc"><div class="ml">МП итого бюджет</div><div class="mv">${fmt(laBud.reduce((a,b)=>a+b,0)+zyBud.reduce((a,b)=>a+b,0))}</div></div>
+    <div class="mc"><div class="ml">Источник данных</div><div class="mv" style="font-size:14px">Отчёт ком.</div><div class="md neu">Или ручной ввод</div></div>
+  `;
+  dc('ch-mp1');dc('ch-mp2');
+  [['ch-mp1',laBud,'Lamoda'],['ch-mp2',zyBud,'Золотое яблоко']].forEach(([id,bArr,lbl])=>{
+    charts[id]=new Chart(document.getElementById(id),{type:'bar',
+      data:{labels:MONTHS,datasets:[
+        {label:'Факт',data:Array(12).fill(0),backgroundColor:'#1A4A8A'},
+        {label:'Бюджет',data:bArr,type:'line',borderColor:'#B8935A',borderWidth:2,pointRadius:3,fill:false,backgroundColor:'transparent'},
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}},scales:{y:{ticks:{callback:v=>fmt(v),font:{size:10}}}}}
+    });
+  });
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────
+loadSalesFromSheets();
+</script>
+</body>
+</html>
